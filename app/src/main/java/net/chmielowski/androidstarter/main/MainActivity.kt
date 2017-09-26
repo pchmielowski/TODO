@@ -1,6 +1,5 @@
 package net.chmielowski.androidstarter.main
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -27,7 +26,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var viewModel: MainViewModel
+    lateinit var tasks: Tasks
 
     private val disposable = CompositeDisposable()
 
@@ -41,16 +40,17 @@ class MainActivity : AppCompatActivity() {
         task_list.adapter = adapter
         disposable.addAll(
                 RxView.clicks(add)
+                        .observeOn(Schedulers.io())
                         .subscribe {
-                            viewModel.addTask(new_task.text)
+                            tasks.add(new_task.text)
                         },
-                viewModel.tasks()
-                        .subscribeOn(Schedulers.io())
+                tasks.all()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe { adapter.replaceTasks(it) },
                 adapter.itemDelete()
+                        .observeOn(Schedulers.io())
                         .subscribe {
-                            viewModel.remove(it)
+                            tasks.remove(it)
                         })
     }
 
@@ -90,20 +90,15 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
 
 class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-class MainViewModel @Inject constructor(private val db: AppDatabase) {
-    fun addTask(text: CharSequence) {
-        val task = Task(text.toString())
-        AsyncTask.execute {
-            db.dao().insert(task)
-        }
+class Tasks @Inject constructor(private val db: AppDatabase) {
+    fun add(text: CharSequence) {
+        db.dao().insert(Task(text.toString()))
     }
 
-    fun tasks(): Flowable<List<Task>> = db.dao().all
+    fun all(): Flowable<List<Task>> = db.dao().all.subscribeOn(Schedulers.io())
 
     fun remove(task: Task) {
-        AsyncTask.execute {
-            task.removed = true
-            db.dao().update(task)
-        }
+        task.removed = true
+        db.dao().update(task)
     }
 }
