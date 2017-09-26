@@ -92,8 +92,7 @@ class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
 class MainViewModel @Inject constructor(private val db: AppDatabase) {
     fun addTask(text: CharSequence) {
-        val task = Task()
-        task.name = text.toString()
+        val task = Task(text.toString())
         AsyncTask.execute {
             db.dao().insert(task)
         }
@@ -103,7 +102,8 @@ class MainViewModel @Inject constructor(private val db: AppDatabase) {
 
     fun remove(task: Task) {
         AsyncTask.execute {
-            db.dao().delete(task)
+            task.removed = true
+            db.dao().update(task)
         }
     }
 }
