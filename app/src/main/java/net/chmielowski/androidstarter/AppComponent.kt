@@ -3,9 +3,9 @@ package net.chmielowski.androidstarter
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.support.AndroidSupportInjectionModule
-import net.chmielowski.androidstarter.main.MainActivity
+import javax.inject.Singleton
 
-
+@Singleton
 @Component(modules = arrayOf(
         AppModule::class,
         AndroidSupportInjectionModule::class,

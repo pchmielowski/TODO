@@ -44,4 +44,12 @@ dependencies {
     compile "com.google.dagger:dagger:$dagger_version"
     annotationProcessor "com.google.dagger:dagger-android-processor:$dagger_version"
     compile "com.google.dagger:dagger-android-support:$dagger_version"
+
+    /* Room */
+    def room_version = "1.0.0-alpha9-1"
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
+    testImplementation "android.arch.persistence.room:testing:$room_version"
+    implementation "android.arch.persistence.room:rxjava2:$room_version"
 }
