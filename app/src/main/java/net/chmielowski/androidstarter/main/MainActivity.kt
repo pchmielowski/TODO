@@ -1,10 +1,11 @@
 package net.chmielowski.androidstarter.main
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import dagger.android.AndroidInjection
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import net.chmielowski.androidstarter.R
 import net.chmielowski.androidstarter.room.AppDatabase
 import net.chmielowski.androidstarter.room.User
@@ -21,16 +22,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val user = User()
-        user.firstName = "Piotrek"
-        user.lastName = "Chmielowski"
-        AsyncTask.execute {
-            room.userDao()
-                    .insertAll(user)
-            room.userDao()
-                    .all
-                    .forEach {
+        user.firstName = "Jeremy"
+        user.lastName = "Clarkson"
+
+        Completable.fromCallable { room.userDao().insertAll(user) }
+                .subscribeOn(Schedulers.io())
+                .andThen(room.userDao().all)
+                .subscribe {
+                    it.forEach {
                         Log.d("pchm", it.firstName + it.lastName)
                     }
-        }
+                }
     }
 }
