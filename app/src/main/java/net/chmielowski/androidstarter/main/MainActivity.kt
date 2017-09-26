@@ -11,9 +11,12 @@ import android.view.ViewGroup
 import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.AndroidInjection
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_task.view.*
 import net.chmielowski.androidstarter.R
@@ -44,7 +47,11 @@ class MainActivity : AppCompatActivity() {
                 viewModel.tasks()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { adapter.replaceTasks(it) })
+                        .subscribe { adapter.replaceTasks(it) },
+                adapter.itemDelete()
+                        .subscribe {
+                            viewModel.remove(it)
+                        })
     }
 
     override fun onDestroy() {
@@ -56,8 +63,15 @@ class MainActivity : AppCompatActivity() {
 class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     override fun getItemCount(): Int = list.size
 
+    private val itemClickSubject: Subject<Task> = PublishSubject.create()
+
+    fun itemDelete(): Observable<Task> = itemClickSubject
+
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         holder.itemView.name.text = list[position].name
+        RxView.clicks(holder.itemView.delete)
+                .map { list[position] }
+                .subscribe(itemClickSubject)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int) = TaskViewHolder(view(parent))
@@ -86,4 +100,10 @@ class MainViewModel @Inject constructor(private val db: AppDatabase) {
     }
 
     fun tasks(): Flowable<List<Task>> = db.dao().all
+
+    fun remove(task: Task) {
+        AsyncTask.execute {
+            db.dao().delete(task)
+        }
+    }
 }
