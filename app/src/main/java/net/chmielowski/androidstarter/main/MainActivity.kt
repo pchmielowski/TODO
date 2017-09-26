@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
                 RxView.clicks(add)
                         .subscribe {
                             viewModel.addTask(new_task.text)
-                            adapter.finishedEditing()
                         },
                 viewModel.tasks()
                         .subscribeOn(Schedulers.io())
@@ -73,15 +72,9 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
         list = tasks
         notifyDataSetChanged()
     }
-
-    fun finishedEditing() {
-        notifyDataSetChanged()
-    }
-
 }
 
-abstract class AbstractViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-class TaskViewHolder(itemView: View) : AbstractViewHolder(itemView)
+class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
 class MainViewModel @Inject constructor(private val db: AppDatabase) {
     fun addTask(text: CharSequence) {

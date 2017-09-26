@@ -10,7 +10,7 @@ import io.reactivex.Flowable;
 
 @Dao
 public interface TaskDao {
-    @Query("SELECT * FROM Task")
+    @Query("SELECT * FROM Task ORDER BY task.uid DESC")
     Flowable<List<Task>> getAll();
 
     @Insert
