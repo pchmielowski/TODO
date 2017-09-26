@@ -11,7 +11,7 @@ import io.reactivex.Flowable;
 
 @Dao
 public interface TaskDao {
-    @Query("SELECT * FROM Task WHERE removed = 0 ORDER BY task.uid DESC")
+    @Query("SELECT * FROM Task WHERE done = 0 ORDER BY task.uid DESC")
     Flowable<List<Task>> getAll();
 
     @Insert

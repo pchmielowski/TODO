@@ -5,22 +5,22 @@ import android.arch.persistence.room.PrimaryKey;
 
 @Entity
 public class Task {
-    public boolean removed;
+    public boolean done;
     @PrimaryKey(autoGenerate = true)
     private int uid;
     private String name;
 
     public Task(String name) {
         this.name = name;
-        this.removed = false;
+        this.done = false;
     }
 
-    boolean isRemoved() {
-        return removed;
+    boolean isDone() {
+        return done;
     }
 
-    void setRemoved(boolean removed) {
-        this.removed = removed;
+    void setDone(boolean done) {
+        this.done = done;
     }
 
     public int getUid() {

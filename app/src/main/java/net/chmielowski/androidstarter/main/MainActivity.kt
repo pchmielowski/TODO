@@ -47,10 +47,10 @@ class MainActivity : AppCompatActivity() {
                 tasks.all()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe { adapter.replaceTasks(it) },
-                adapter.itemDelete()
+                adapter.itemDone()
                         .observeOn(Schedulers.io())
                         .subscribe {
-                            tasks.remove(it)
+                            tasks.markAsDone(it)
                         })
     }
 
@@ -63,15 +63,15 @@ class MainActivity : AppCompatActivity() {
 class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     override fun getItemCount(): Int = list.size
 
-    private val itemClickSubject: Subject<Task> = PublishSubject.create()
+    private val doneSubject: Subject<Task> = PublishSubject.create()
 
-    fun itemDelete(): Observable<Task> = itemClickSubject
+    fun itemDone(): Observable<Task> = doneSubject
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         holder.itemView.name.text = list[position].name
-        RxView.clicks(holder.itemView.delete)
+        RxView.clicks(holder.itemView.done)
                 .map { list[position] }
-                .subscribe(itemClickSubject)
+                .subscribe(doneSubject)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int) = TaskViewHolder(view(parent))
@@ -97,8 +97,8 @@ class Tasks @Inject constructor(private val db: AppDatabase) {
 
     fun all(): Flowable<List<Task>> = db.dao().all.subscribeOn(Schedulers.io())
 
-    fun remove(task: Task) {
-        task.removed = true
+    fun markAsDone(task: Task) {
+        task.done = true
         db.dao().update(task)
     }
 }
